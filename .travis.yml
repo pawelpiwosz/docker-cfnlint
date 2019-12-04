@@ -1,11 +1,10 @@
-sudo: required
-dist: trusty
-language: bash
+dist: linux
+language: shell
 
 stages:
   # - name: Script tests
   - name: Push container
-    if: branch = master && type = pull_request
+    # if: branch = master && type = pull_request
   - name: Check container
     if: branch = master || type = pull_request
 
@@ -28,13 +27,13 @@ jobs:
       - docker build --build-arg BUILD_DATE=${BUILD_DATE} --build-arg VCS_REF=${VCS_REF} --build-arg VER=${VER} -t cfnlint .
       - docker images
       - echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
-      - docker tag cfnlint ${DOCKER_USERNAME}/cfnlint:default
-      - docker push ${DOCKER_USERNAME}/cfnlint:default
+      - docker tag cfnlint ${DOCKER_USERNAME}/cfnlint:latest
+      - docker push ${DOCKER_USERNAME}/cfnlint:latest
       #- curl -X POST https://hooks.microbadger.com/images/almerhor/cfnlint/BwefVjGpzAqzhSfbiv-fIq33dd0=
       - docker logout
 
   - stage: Check container
     script:
-      - docker pull ${DOCKER_USERNAME}/cfnlint:default
+      - docker pull ${DOCKER_USERNAME}/cfnlint:latest
       - testpath="$(pwd)/tests"
-      - docker run --rm -v ${testpath}:/lintfiles ${DOCKER_USERNAME}/cfnlint:default --help
+      - docker run --rm -v ${testpath}:/lintfiles ${DOCKER_USERNAME}/cfnlint:latest --help
